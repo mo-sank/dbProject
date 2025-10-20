@@ -41,23 +41,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
         },
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
+            icon: Icon(Icons.home, size: 24),
+            selectedIcon: Icon(Icons.home, size: 24, color: Colors.white),
             label: 'Home',
           ),
           NavigationDestination(
-            icon: Icon(Icons.school_outlined),
-            selectedIcon: Icon(Icons.school),
+            icon: Icon(Icons.book, size: 24),
+            selectedIcon: Icon(Icons.book, size: 24, color: Colors.white),
             label: 'Learn',
           ),
           NavigationDestination(
-            icon: Icon(Icons.explore_outlined),
-            selectedIcon: Icon(Icons.explore),
+            icon: Icon(Icons.location_on, size: 24),
+            selectedIcon: Icon(Icons.location_on, size: 24, color: Colors.white),
             label: 'Explore',
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
+            icon: Icon(Icons.account_circle, size: 24),
+            selectedIcon: Icon(Icons.account_circle, size: 24, color: Colors.white),
             label: 'Profile',
           ),
         ],
