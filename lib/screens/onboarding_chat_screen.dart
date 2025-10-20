@@ -4,6 +4,7 @@ import 'package:animate_do/animate_do.dart';
 import '../models/user_model.dart';
 import '../providers/user_provider.dart';
 import '../providers/budget_provider.dart';
+import '../services/location_service.dart';
 import 'dashboard_screen.dart';
 
 class OnboardingChatScreen extends StatefulWidget {
@@ -23,6 +24,8 @@ class OnboardingChatScreen extends StatefulWidget {
 class _OnboardingChatScreenState extends State<OnboardingChatScreen> {
   final List<ChatMessage> _messages = [];
   int _currentStep = 0;
+  final LocationService _locationService = LocationService();
+  bool _isGettingLocation = false;
   
   String? _location;
   int? _familySize;
@@ -141,6 +144,37 @@ class _OnboardingChatScreenState extends State<OnboardingChatScreen> {
     return messages[_currentStep % messages.length];
   }
 
+  Future<void> _useCurrentLocation() async {
+    setState(() => _isGettingLocation = true);
+    
+    try {
+      final address = await _locationService.getCurrentLocationAddress();
+      if (address != null) {
+        _handleAnswer(address);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Unable to get location. Please enter manually.'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Location permission denied. Please enter manually.'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    }
+    
+    setState(() => _isGettingLocation = false);
+  }
+
   void _completeOnboarding() {
     setState(() {
       _messages.add(ChatMessage(
@@ -249,7 +283,7 @@ class _OnboardingChatScreenState extends State<OnboardingChatScreen> {
       );
     }
 
-    // Text input
+    // Text input with optional GPS button for location
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -262,22 +296,49 @@ class _OnboardingChatScreenState extends State<OnboardingChatScreen> {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Type your answer...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
+          if (question.key == 'location')
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _isGettingLocation ? null : _useCurrentLocation,
+                  icon: _isGettingLocation
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.my_location),
+                  label: Text(_isGettingLocation ? 'Getting location...' : '📍 Use My Current Location'),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.all(16),
+                    side: BorderSide(color: Theme.of(context).colorScheme.primary),
+                  ),
                 ),
               ),
-              onSubmitted: _handleAnswer,
             ),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Type your answer...',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ),
+                  onSubmitted: _handleAnswer,
+                ),
+              ),
+            ],
           ),
         ],
       ),

@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:animate_do/animate_do.dart';
 import '../models/recommendation_model.dart';
 import '../providers/user_provider.dart';
+import '../services/places_service.dart';
+import '../widgets/map_preview.dart';
+import 'map_view_screen.dart';
 
 class RecommendationsScreen extends StatefulWidget {
   const RecommendationsScreen({super.key});
@@ -13,6 +16,9 @@ class RecommendationsScreen extends StatefulWidget {
 
 class _RecommendationsScreenState extends State<RecommendationsScreen> {
   String _selectedCategory = 'All';
+  List<RecommendationModel> _recommendations = [];
+  bool _isLoading = false;
+  final PlacesService _placesService = PlacesService();
 
   final List<String> _categories = [
     'All',
@@ -22,7 +28,46 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
     'Banking',
   ];
 
-  List<RecommendationModel> _getRecommendations() {
+  @override
+  void initState() {
+    super.initState();
+    _loadRecommendations();
+  }
+
+  Future<void> _loadRecommendations() async {
+    setState(() => _isLoading = true);
+    
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+    if (user == null) return;
+
+    try {
+      // Load recommendations for all categories
+      final allRecs = <RecommendationModel>[];
+      
+      for (var category in _categories) {
+        if (category == 'All') continue;
+        
+        final recs = await _placesService.searchNearbyPlaces(
+          location: user.location,
+          category: category,
+        );
+        allRecs.addAll(recs);
+      }
+      
+      setState(() {
+        _recommendations = allRecs;
+        _isLoading = false;
+      });
+    } catch (e) {
+      // Fallback to curated recommendations
+      setState(() {
+        _recommendations = _getFallbackRecommendations();
+        _isLoading = false;
+      });
+    }
+  }
+
+  List<RecommendationModel> _getFallbackRecommendations() {
     return [
       RecommendationModel(
         id: '1',
@@ -126,10 +171,9 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<UserProvider>(context).user!;
-    final recommendations = _getRecommendations();
     final filteredRecommendations = _selectedCategory == 'All'
-        ? recommendations
-        : recommendations.where((r) => r.category == _selectedCategory).toList();
+        ? _recommendations
+        : _recommendations.where((r) => r.category == _selectedCategory).toList();
 
     return Scaffold(
       body: Container(
@@ -153,13 +197,35 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Local Deals',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Local Deals',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => MapViewScreen(
+                                  recommendations: filteredRecommendations,
+                                  userLocation: user.location,
+                                ),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.map_outlined),
+                          color: Colors.white,
+                          iconSize: 28,
+                          tooltip: 'Map View',
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -174,8 +240,9 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
               ),
 
               // Category Filter
-              SizedBox(
+              Container(
                 height: 50,
+                margin: const EdgeInsets.only(bottom: 8),
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -191,10 +258,16 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
                         onSelected: (selected) {
                           setState(() => _selectedCategory = category);
                         },
-                        backgroundColor: Colors.white.withOpacity(0.2),
-                        selectedColor: Colors.white,
+                        backgroundColor: Colors.white,
+                        selectedColor: Theme.of(context).colorScheme.primary,
+                        side: BorderSide(
+                          color: isSelected 
+                              ? Theme.of(context).colorScheme.primary
+                              : Colors.white.withValues(alpha: 0.5),
+                          width: isSelected ? 2 : 1,
+                        ),
                         labelStyle: TextStyle(
-                          color: isSelected ? Theme.of(context).colorScheme.primary : Colors.white,
+                          color: isSelected ? Colors.white : Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -202,31 +275,145 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
                   },
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
 
-              // Recommendations List
+              // Split View: Map (top half) + List (bottom half)
               Expanded(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(30),
-                      topRight: Radius.circular(30),
-                    ),
-                  ),
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(20),
-                    itemCount: filteredRecommendations.length,
-                    itemBuilder: (context, index) {
-                      return FadeInUp(
-                        delay: Duration(milliseconds: 50 * index),
-                        child: _RecommendationCard(
-                          recommendation: filteredRecommendations[index],
+                child: _isLoading
+                    ? const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(color: Colors.white),
+                            SizedBox(height: 16),
+                            Text(
+                              'Finding local deals...',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
-                      );
-                    },
-                  ),
-                ),
+                      )
+                    : Column(
+                        children: [
+                          // Map View (Top Half)
+                          Expanded(
+                            flex: 1,
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(horizontal: 20),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.1),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 5),
+                                  ),
+                                ],
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: MapPreview(
+                                  recommendations: filteredRecommendations,
+                                  userLocation: user.location,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          
+                          // Recommendations List (Bottom Half)
+                          Expanded(
+                            flex: 1,
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(30),
+                                  topRight: Radius.circular(30),
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(20),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          '${filteredRecommendations.length} places found',
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        TextButton.icon(
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) => MapViewScreen(
+                                                  recommendations: filteredRecommendations,
+                                                  userLocation: user.location,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                          icon: const Icon(Icons.fullscreen, size: 18),
+                                          label: const Text('Full Map'),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: filteredRecommendations.isEmpty
+                                        ? Center(
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                const Text('📍', style: TextStyle(fontSize: 48)),
+                                                const SizedBox(height: 12),
+                                                const Text(
+                                                  'No places found',
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  'Try a different category',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: Colors.grey[600],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          )
+                                        : ListView.builder(
+                                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                                            itemCount: filteredRecommendations.length,
+                                            itemBuilder: (context, index) {
+                                              return FadeInUp(
+                                                delay: Duration(milliseconds: 50 * index),
+                                                child: _CompactRecommendationCard(
+                                                  recommendation: filteredRecommendations[index],
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
               ),
             ],
           ),
@@ -236,172 +423,76 @@ class _RecommendationsScreenState extends State<RecommendationsScreen> {
   }
 }
 
-class _RecommendationCard extends StatelessWidget {
+// Compact card for split-view list
+class _CompactRecommendationCard extends StatelessWidget {
   final RecommendationModel recommendation;
 
-  const _RecommendationCard({required this.recommendation});
+  const _CompactRecommendationCard({required this.recommendation});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Center(
+              child: Text(recommendation.icon, style: const TextStyle(fontSize: 20)),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
+                Text(
+                  recommendation.title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
                   ),
-                  child: Center(
-                    child: Text(
-                      recommendation.icon,
-                      style: const TextStyle(fontSize: 32),
-                    ),
-                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              recommendation.title,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.amber[100],
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.star,
-                                  size: 14,
-                                  color: Colors.amber,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  '${recommendation.rating}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        recommendation.description,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          const Icon(Icons.location_on, size: 14, color: Colors.grey),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              recommendation.location,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                          if (recommendation.distance > 0) ...[
-                            const SizedBox(width: 8),
-                            Text(
-                              '${recommendation.distance} km',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
-                  ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    const Icon(Icons.star, size: 12, color: Colors.amber),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${recommendation.rating.toStringAsFixed(1)}',
+                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(width: 8),
+                    const Icon(Icons.navigation, size: 10, color: Colors.blue),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${recommendation.distance.toStringAsFixed(1)} km',
+                      style: const TextStyle(fontSize: 11, color: Colors.grey),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.green[50],
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(16),
-                bottomRight: Radius.circular(16),
-              ),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.savings,
-                  size: 16,
-                  color: Colors.green,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    recommendation.savingsInfo,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Colors.green,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                Text(
-                  recommendation.priceRange,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[700],
-                  ),
-                ),
-              ],
+          Text(
+            recommendation.priceRange,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
             ),
           ),
         ],
@@ -409,4 +500,5 @@ class _RecommendationCard extends StatelessWidget {
     );
   }
 }
+
 
