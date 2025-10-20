@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
+import '../l10n/app_localizations.dart';
 import 'registration_screen.dart';
+import 'language_selection_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -17,7 +19,7 @@ class _SplashScreenState extends State<SplashScreen> {
       if (mounted) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+          MaterialPageRoute(builder: (_) => const LanguageSelectionScreen()),
         );
       }
     });
@@ -52,7 +54,7 @@ class _SplashScreenState extends State<SplashScreen> {
               FadeInUp(
                 duration: const Duration(milliseconds: 800),
                 child: const Text(
-                  'Masari Family',
+                  'FinPath',
                   style: TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.bold,
@@ -84,6 +86,8 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -111,20 +115,20 @@ class WelcomeScreen extends StatelessWidget {
                         style: TextStyle(fontSize: 80),
                       ),
                       const SizedBox(height: 24),
-                      const Text(
-                        'Welcome to Masari Family',
+                      Text(
+                        l10n.welcomeTitle,
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
                       ),
                       const SizedBox(height: 16),
-                      const Text(
-                        'Helping immigrant families budget smarter, live better, and build a future — one local choice at a time.',
+                      Text(
+                        l10n.welcomeSubtitle,
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                           color: Colors.white70,
                           height: 1.5,
@@ -138,20 +142,20 @@ class WelcomeScreen extends StatelessWidget {
                     children: [
                       _FeatureCard(
                         icon: '📊',
-                        title: 'Track Your Budget',
-                        description: 'Monitor expenses and reach your goals',
+                        title: l10n.featureTrackBudget,
+                        description: l10n.featureTrackBudgetDesc,
                       ),
                       const SizedBox(height: 12),
                       _FeatureCard(
                         icon: '🎓',
-                        title: 'Learn & Earn Points',
-                        description: 'Gamified lessons about family finance',
+                        title: l10n.featureLearnEarn,
+                        description: l10n.featureLearnEarnDesc,
                       ),
                       const SizedBox(height: 12),
                       _FeatureCard(
                         icon: '📍',
-                        title: 'Local Recommendations',
-                        description: 'Find affordable services nearby',
+                        title: l10n.featureLocalRecs,
+                        description: l10n.featureLocalRecsDesc,
                       ),
                       const SizedBox(height: 32),
                       SizedBox(
@@ -173,9 +177,9 @@ class WelcomeScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(16),
                             ),
                           ),
-                          child: const Text(
-                            'Get Started',
-                            style: TextStyle(
+                          child: Text(
+                            l10n.getStarted,
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),

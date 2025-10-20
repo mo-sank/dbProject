@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:animate_do/animate_do.dart';
 import '../providers/lesson_provider.dart';
-import '../models/lesson_model.dart';
-import 'lesson_detail_screen.dart';
+import '../models/quiz_question_model.dart';
+import 'quiz_lesson_screen.dart';
 
 class LessonsScreen extends StatelessWidget {
   const LessonsScreen({super.key});
@@ -173,7 +173,7 @@ class LessonsScreen extends StatelessWidget {
 }
 
 class _LessonCard extends StatelessWidget {
-  final LessonModel lesson;
+  final QuizLesson lesson;
 
   const _LessonCard({required this.lesson});
 
@@ -184,7 +184,7 @@ class _LessonCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => LessonDetailScreen(lesson: lesson),
+            builder: (_) => QuizLessonScreen(lesson: lesson),
           ),
         );
       },

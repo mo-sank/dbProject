@@ -4,6 +4,8 @@ import 'package:animate_do/animate_do.dart';
 import '../providers/user_provider.dart';
 import '../providers/budget_provider.dart';
 import '../providers/lesson_provider.dart';
+import '../providers/language_provider.dart';
+import '../l10n/app_localizations.dart';
 import 'budget_detail_screen.dart';
 import 'lessons_screen.dart';
 import 'recommendations_screen.dart';
@@ -316,7 +318,7 @@ class HomePage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Masari Mentor Says 🤖',
+                        'FinBot Says 🤖',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -501,10 +503,43 @@ class _QuickActionCard extends StatelessWidget {
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
+  void _showLanguageSelector(BuildContext context) {
+    final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Select Language'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: supportedLanguages.length,
+            itemBuilder: (context, index) {
+              final langCode = supportedLanguages[index];
+              final langName = languageNames[langCode]!;
+              final isSelected = languageProvider.locale.languageCode == langCode;
+              
+              return ListTile(
+                title: Text(langName),
+                trailing: isSelected ? const Icon(Icons.check, color: Colors.green) : null,
+                onTap: () {
+                  languageProvider.setLanguage(langCode);
+                  Navigator.pop(context);
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<UserProvider>(context).user!;
     final lessonProvider = Provider.of<LessonProvider>(context);
+    final languageProvider = Provider.of<LanguageProvider>(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -571,6 +606,14 @@ class ProfilePage extends StatelessWidget {
               icon: '📚',
               title: 'Lessons Completed',
               value: '${lessonProvider.completedLessons} of ${lessonProvider.lessons.length}',
+            ),
+            GestureDetector(
+              onTap: () => _showLanguageSelector(context),
+              child: _ProfileCard(
+                icon: '🌍',
+                title: 'Language',
+                value: languageNames[languageProvider.locale.languageCode] ?? 'English',
+              ),
             ),
           ],
         ),
