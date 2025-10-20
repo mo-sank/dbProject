@@ -1,18 +1,51 @@
 import 'package:flutter/foundation.dart';
 import '../models/budget_model.dart';
+import '../services/firebase_service.dart';
 
 class BudgetProvider extends ChangeNotifier {
   List<BudgetCategory> _categories = [];
   SavingsGoal? _savingsGoal;
+  bool _isLoading = false;
+  FirebaseService? _firebaseService;
 
   List<BudgetCategory> get categories => _categories;
   SavingsGoal? get savingsGoal => _savingsGoal;
+  bool get isLoading => _isLoading;
 
   double get totalBudget => _categories.fold(0, (sum, cat) => sum + cat.budgeted);
   double get totalSpent => _categories.fold(0, (sum, cat) => sum + cat.spent);
   double get totalRemaining => totalBudget - totalSpent;
 
-  void initializeBudget(String incomeRange) {
+  void setFirebaseService(FirebaseService service) {
+    _firebaseService = service;
+    loadBudgetData();
+  }
+
+  Future<void> loadBudgetData() async {
+    if (_firebaseService == null) return;
+    
+    _isLoading = true;
+    notifyListeners();
+    
+    try {
+      final categories = await _firebaseService!.getBudgetCategories();
+      if (categories != null) {
+        _categories = categories;
+      }
+      
+      final goal = await _firebaseService!.getSavingsGoal();
+      if (goal != null) {
+        _savingsGoal = goal;
+      }
+    } catch (e) {
+      print('Error loading budget data: $e');
+    }
+    
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> initializeBudget(String incomeRange) async {
     // Initialize based on income range
     double income = _parseIncome(incomeRange);
     
@@ -64,11 +97,17 @@ class BudgetProvider extends ChangeNotifier {
     _savingsGoal = SavingsGoal(
       name: 'Emergency Fund',
       target: 500,
-      current: 125,
+      current: 0,
       icon: '🎯',
     );
 
     notifyListeners();
+    
+    // Save to Firebase
+    if (_firebaseService != null) {
+      await _firebaseService!.saveBudgetCategories(_categories);
+      await _firebaseService!.saveSavingsGoal(_savingsGoal!);
+    }
   }
 
   double _parseIncome(String incomeRange) {
@@ -80,17 +119,27 @@ class BudgetProvider extends ChangeNotifier {
     return 2000;
   }
 
-  void addToSavings(double amount) {
+  Future<void> addToSavings(double amount) async {
     if (_savingsGoal != null) {
       _savingsGoal!.current += amount;
       notifyListeners();
+      
+      // Save to Firebase
+      if (_firebaseService != null) {
+        await _firebaseService!.updateSavingsProgress(_savingsGoal!.current);
+      }
     }
   }
 
-  void updateSpending(String categoryName, double amount) {
+  Future<void> updateSpending(String categoryName, double amount) async {
     final category = _categories.firstWhere((cat) => cat.name == categoryName);
     category.spent += amount;
     notifyListeners();
+    
+    // Save to Firebase
+    if (_firebaseService != null) {
+      await _firebaseService!.updateCategorySpending(categoryName, category.spent);
+    }
   }
 }
 

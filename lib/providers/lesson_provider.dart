@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import '../models/quiz_question_model.dart';
+import '../services/firebase_service.dart';
 
 class LessonProvider extends ChangeNotifier {
+  FirebaseService? _firebaseService;
   final List<QuizLesson> _lessons = [
     QuizLesson(
       id: '1',
@@ -345,17 +347,56 @@ class LessonProvider extends ChangeNotifier {
   ];
 
   int _totalPoints = 0;
+  bool _isLoading = false;
 
   List<QuizLesson> get lessons => _lessons;
   int get totalPoints => _totalPoints;
   int get completedLessons => _lessons.where((l) => l.isCompleted).length;
+  bool get isLoading => _isLoading;
 
-  void completeLesson(String lessonId) {
+  void setFirebaseService(FirebaseService service) {
+    _firebaseService = service;
+    loadLessonProgress();
+  }
+
+  Future<void> loadLessonProgress() async {
+    if (_firebaseService == null) return;
+    
+    _isLoading = true;
+    notifyListeners();
+    
+    try {
+      final progress = await _firebaseService!.getLessonProgress();
+      if (progress != null) {
+        _totalPoints = progress['totalPoints'] as int;
+        final completedMap = progress['completedLessons'] as Map<String, bool>;
+        
+        for (var lesson in _lessons) {
+          lesson.isCompleted = completedMap[lesson.id] ?? false;
+        }
+      }
+    } catch (e) {
+      print('Error loading lesson progress: $e');
+    }
+    
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> completeLesson(String lessonId) async {
     final lesson = _lessons.firstWhere((l) => l.id == lessonId);
     if (!lesson.isCompleted) {
       lesson.isCompleted = true;
       _totalPoints += lesson.points;
       notifyListeners();
+      
+      // Save to Firebase
+      if (_firebaseService != null) {
+        final completedMap = {
+          for (var l in _lessons) l.id: l.isCompleted
+        };
+        await _firebaseService!.saveLessonProgress(completedMap, _totalPoints);
+      }
     }
   }
 

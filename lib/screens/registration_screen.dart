@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:provider/provider.dart';
+import '../services/firebase_service.dart';
 import 'onboarding_chat_screen.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -13,25 +15,54 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => OnboardingChatScreen(
-            name: _nameController.text,
-            email: _emailController.text,
-          ),
-        ),
-      );
+      setState(() => _isLoading = true);
+      
+      try {
+        final firebaseService = Provider.of<FirebaseService>(context, listen: false);
+        
+        // Create account with Firebase Auth
+        await firebaseService.signUpWithEmail(
+          _emailController.text.trim(),
+          _passwordController.text,
+          _nameController.text.trim(),
+        );
+        
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => OnboardingChatScreen(
+                name: _nameController.text,
+                email: _emailController.text,
+              ),
+            ),
+          );
+        }
+      } catch (e) {
+        setState(() => _isLoading = false);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Registration failed: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -147,11 +178,35 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               return null;
                             },
                           ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _passwordController,
+                            decoration: InputDecoration(
+                              labelText: 'Password',
+                              hintText: 'Create a password',
+                              prefixIcon: const Icon(Icons.lock_outlined),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              filled: true,
+                              fillColor: Colors.grey[50],
+                            ),
+                            obscureText: true,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter a password';
+                              }
+                              if (value.length < 6) {
+                                return 'Password must be at least 6 characters';
+                              }
+                              return null;
+                            },
+                          ),
                           const SizedBox(height: 24),
                           SizedBox(
                             height: 56,
                             child: ElevatedButton(
-                              onPressed: _submit,
+                              onPressed: _isLoading ? null : _submit,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Theme.of(context).colorScheme.primary,
                                 foregroundColor: Colors.white,
@@ -160,13 +215,22 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                 ),
                                 elevation: 2,
                               ),
-                              child: const Text(
-                                'Continue',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      width: 24,
+                                      height: 24,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Continue',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                             ),
                           ),
                         ],
