@@ -1,6 +1,6 @@
 class BudgetCategory {
   final String name;
-  final double budgeted;
+  double budgeted; // Changed to non-final so users can edit
   double spent;
   final String icon;
   final int color;

@@ -53,42 +53,42 @@ class BudgetProvider extends ChangeNotifier {
       BudgetCategory(
         name: 'Housing',
         budgeted: income * 0.30,
-        spent: income * 0.28,
+        spent: 0, // User will input actual amount
         icon: '🏠',
         color: 0xFF6C63FF,
       ),
       BudgetCategory(
         name: 'Childcare',
         budgeted: income * 0.20,
-        spent: income * 0.15,
+        spent: 0, // User will input actual amount
         icon: '👶',
         color: 0xFFFF6B9D,
       ),
       BudgetCategory(
         name: 'Groceries',
         budgeted: income * 0.15,
-        spent: income * 0.12,
+        spent: 0, // User will input actual amount
         icon: '🛒',
         color: 0xFF4CAF50,
       ),
       BudgetCategory(
         name: 'Transportation',
         budgeted: income * 0.10,
-        spent: income * 0.08,
+        spent: 0, // User will input actual amount
         icon: '🚗',
         color: 0xFFFF9800,
       ),
       BudgetCategory(
         name: 'Remittances',
         budgeted: income * 0.10,
-        spent: income * 0.10,
+        spent: 0, // User will input actual amount
         icon: '💸',
         color: 0xFF2196F3,
       ),
       BudgetCategory(
         name: 'Other',
         budgeted: income * 0.15,
-        spent: income * 0.10,
+        spent: 0, // User will input actual amount
         icon: '📦',
         color: 0xFF9C27B0,
       ),
@@ -140,6 +140,23 @@ class BudgetProvider extends ChangeNotifier {
     if (_firebaseService != null) {
       await _firebaseService!.updateCategorySpending(categoryName, category.spent);
     }
+  }
+
+  Future<void> saveBudgetToFirebase() async {
+    if (_firebaseService != null) {
+      await _firebaseService!.saveBudgetCategories(_categories);
+      if (_savingsGoal != null) {
+        await _firebaseService!.saveSavingsGoal(_savingsGoal!);
+      }
+    }
+    notifyListeners();
+  }
+
+  void updateCategoryBudget(String categoryName, double budgeted, double spent) {
+    final category = _categories.firstWhere((cat) => cat.name == categoryName);
+    category.budgeted = budgeted;
+    category.spent = spent;
+    notifyListeners();
   }
 }
 

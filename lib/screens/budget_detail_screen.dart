@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../providers/budget_provider.dart';
+import 'budget_edit_screen.dart';
 
 class BudgetDetailScreen extends StatelessWidget {
   const BudgetDetailScreen({super.key});
@@ -14,6 +15,18 @@ class BudgetDetailScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Budget Overview'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const BudgetEditScreen()),
+              );
+            },
+            tooltip: 'Edit Budget',
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),

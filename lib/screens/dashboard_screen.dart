@@ -7,6 +7,7 @@ import '../providers/lesson_provider.dart';
 import '../providers/language_provider.dart';
 import '../l10n/app_localizations.dart';
 import 'budget_detail_screen.dart';
+import 'budget_edit_screen.dart';
 import 'lessons_screen.dart';
 import 'recommendations_screen.dart';
 
@@ -149,6 +150,12 @@ class HomePage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const BudgetDetailScreen()),
+                      );
+                    },
+                    onLongPress: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const BudgetEditScreen()),
                       );
                     },
                     child: Container(
