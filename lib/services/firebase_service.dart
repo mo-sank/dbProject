@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/user_model.dart';
 import '../models/budget_model.dart';
+import '../models/scam_alert_model.dart';
 
 class FirebaseService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -247,6 +248,92 @@ class FirebaseService {
     } catch (e) {
       print('Error getting language preference: $e');
       return null;
+    }
+  }
+
+  // Scam Alerts
+  Future<void> saveScamAlert(ScamAlert alert) async {
+    try {
+      await _firestore.collection('scam_alerts').doc(alert.id).set(alert.toJson());
+    } catch (e) {
+      print('Error saving scam alert: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<ScamAlert>> getScamAlerts(String location) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('scam_alerts')
+          .where('location', isEqualTo: location)
+          .where('isActive', isEqualTo: true)
+          .orderBy('priority')
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      return querySnapshot.docs
+          .map((doc) => ScamAlert.fromJson(doc.data()))
+          .toList();
+    } catch (e) {
+      print('Error getting scam alerts: $e');
+      return [];
+    }
+  }
+
+  Future<void> updateScamAlert(ScamAlert alert) async {
+    try {
+      await _firestore.collection('scam_alerts').doc(alert.id).update(alert.toJson());
+    } catch (e) {
+      print('Error updating scam alert: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> deleteScamAlert(String alertId) async {
+    try {
+      await _firestore.collection('scam_alerts').doc(alertId).delete();
+    } catch (e) {
+      print('Error deleting scam alert: $e');
+      rethrow;
+    }
+  }
+
+  Future<List<ScamAlert>> getScamAlertsByCategory(String location, String category) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('scam_alerts')
+          .where('location', isEqualTo: location)
+          .where('category', isEqualTo: category)
+          .where('isActive', isEqualTo: true)
+          .orderBy('priority')
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      return querySnapshot.docs
+          .map((doc) => ScamAlert.fromJson(doc.data()))
+          .toList();
+    } catch (e) {
+      print('Error getting scam alerts by category: $e');
+      return [];
+    }
+  }
+
+  Future<List<ScamAlert>> getHighPriorityScamAlerts(String location) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('scam_alerts')
+          .where('location', isEqualTo: location)
+          .where('priority', isEqualTo: 1)
+          .where('isActive', isEqualTo: true)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      return querySnapshot.docs
+          .map((doc) => ScamAlert.fromJson(doc.data()))
+          .toList();
+    } catch (e) {
+      print('Error getting high priority scam alerts: $e');
+      return [];
     }
   }
 }

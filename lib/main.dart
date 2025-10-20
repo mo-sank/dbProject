@@ -8,6 +8,7 @@ import 'providers/user_provider.dart';
 import 'providers/budget_provider.dart';
 import 'providers/lesson_provider.dart';
 import 'providers/language_provider.dart';
+import 'providers/scam_alert_provider.dart';
 import 'services/firebase_config.dart';
 import 'services/firebase_service.dart';
 import 'l10n/app_localizations.dart';
@@ -57,6 +58,13 @@ class FinPathApp extends StatelessWidget {
           update: (_, firebaseService, lessonProvider) {
             lessonProvider!.setFirebaseService(firebaseService);
             return lessonProvider;
+          },
+        ),
+        ChangeNotifierProxyProvider<FirebaseService, ScamAlertProvider>(
+          create: (_) => ScamAlertProvider(),
+          update: (_, firebaseService, scamAlertProvider) {
+            scamAlertProvider!.setFirebaseService(firebaseService);
+            return scamAlertProvider;
           },
         ),
       ],

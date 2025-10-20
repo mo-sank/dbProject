@@ -5,11 +5,13 @@ import '../providers/user_provider.dart';
 import '../providers/budget_provider.dart';
 import '../providers/lesson_provider.dart';
 import '../providers/language_provider.dart';
+import '../providers/scam_alert_provider.dart';
 import '../l10n/app_localizations.dart';
 import 'budget_detail_screen.dart';
 import 'budget_edit_screen.dart';
 import 'lessons_screen.dart';
 import 'recommendations_screen.dart';
+import 'scam_alerts_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -72,6 +74,14 @@ class HomePage extends StatelessWidget {
     final user = Provider.of<UserProvider>(context).user!;
     final budgetProvider = Provider.of<BudgetProvider>(context);
     final lessonProvider = Provider.of<LessonProvider>(context);
+    final scamAlertProvider = Provider.of<ScamAlertProvider>(context);
+
+    // Initialize scam alerts when user location is available
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (scamAlertProvider.userLocation.isEmpty) {
+        scamAlertProvider.initializeAlerts(user.location);
+      }
+    });
 
     return Scaffold(
       body: Container(
@@ -347,6 +357,51 @@ class HomePage extends StatelessWidget {
                       ),
                     ],
                   ),
+                ),
+                const SizedBox(height: 24),
+
+                // Scam Alerts Section
+                Consumer<ScamAlertProvider>(
+                  builder: (context, scamAlertProvider, child) {
+                    final dashboardAlerts = scamAlertProvider.getDashboardAlerts();
+                    
+                    if (dashboardAlerts.isNotEmpty) {
+                      return FadeInUp(
+                        delay: const Duration(milliseconds: 400),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  'Scam Alerts 🚨',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (_) => const ScamAlertsScreen()),
+                                    );
+                                  },
+                                  child: const Text('View All'),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            ...dashboardAlerts.take(2).map((alert) => 
+                              _ScamAlertCard(alert: alert)
+                            ).toList(),
+                          ],
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
                 ),
                 const SizedBox(height: 24),
 
@@ -687,3 +742,50 @@ class _ProfileCard extends StatelessWidget {
   }
 }
 
+class _ScamAlertCard extends StatelessWidget {
+  final dynamic alert; // Using dynamic to avoid import issues
+
+  const _ScamAlertCard({required this.alert});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.red[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.red[200]!),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.warning, color: Colors.red[600], size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  alert.alert,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.red[800],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  alert.tip,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.red[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
