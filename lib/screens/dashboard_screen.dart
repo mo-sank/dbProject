@@ -335,7 +335,7 @@ class HomePage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'FinBot Says 🤖',
+                        'MulahBot Says 🤖',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,

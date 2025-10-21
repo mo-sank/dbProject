@@ -3,9 +3,9 @@
 
 const Map<String, Map<String, String>> translations = {
   'en': {
-    'app_name': 'FinPath',
-    'app_tagline': 'Your Local Financial Guide',
-    'welcome_title': 'Welcome to FinPath',
+    'app_name': 'Mulah',
+    'app_tagline': 'Your AI Financial Buddy',
+    'welcome_title': 'Welcome to Mulah',
     'welcome_subtitle': 'Helping families budget smarter, live better, and build a future — one local choice at a time.',
     'get_started': 'Get Started',
     
@@ -25,7 +25,7 @@ const Map<String, Map<String, String>> translations = {
     'continue': 'Continue',
     'data_secure': 'Your information is safe and secure with us',
     
-    'chat_with_ai': 'Chat with FinBot',
+    'chat_with_ai': 'Chat with MulahBot',
     'type_answer': 'Type your answer...',
     'tap_to_continue': 'Tap cards to continue',
     
@@ -34,7 +34,7 @@ const Map<String, Map<String, String>> translations = {
     'remaining': 'remaining',
     'savings_goal': 'Savings Goal',
     'complete': 'Complete',
-    'ai_mentor_says': 'FinBot Says 🤖',
+    'ai_mentor_says': 'MulahBot Says 🤖',
     'quick_actions': 'Quick Actions',
     'view_budget': 'View Budget',
     'find_deals': 'Find Deals',
@@ -85,9 +85,9 @@ const Map<String, Map<String, String>> translations = {
   },
   
   'es': {
-    'app_name': 'FinPath',
-    'app_tagline': 'Tu Guía Financiera Local',
-    'welcome_title': 'Bienvenido a FinPath',
+    'app_name': 'Mulah',
+    'app_tagline': 'Tu Amigo Financiero con IA',
+    'welcome_title': 'Bienvenido a Mulah',
     'welcome_subtitle': 'Ayudando a las familias a presupuestar mejor, vivir mejor y construir un futuro, una decisión local a la vez.',
     'get_started': 'Comenzar',
     
@@ -107,7 +107,7 @@ const Map<String, Map<String, String>> translations = {
     'continue': 'Continuar',
     'data_secure': 'Tu información está segura con nosotros',
     
-    'chat_with_ai': 'Chatea con FinBot',
+    'chat_with_ai': 'Chatea con MulahBot',
     'type_answer': 'Escribe tu respuesta...',
     'tap_to_continue': 'Toca las tarjetas para continuar',
     
@@ -116,7 +116,7 @@ const Map<String, Map<String, String>> translations = {
     'remaining': 'restante',
     'savings_goal': 'Meta de Ahorro',
     'complete': 'Completo',
-    'ai_mentor_says': 'FinBot Dice 🤖',
+    'ai_mentor_says': 'MulahBot Dice 🤖',
     'quick_actions': 'Acciones Rápidas',
     'view_budget': 'Ver Presupuesto',
     'find_deals': 'Buscar Ofertas',
@@ -167,9 +167,9 @@ const Map<String, Map<String, String>> translations = {
   },
   
   'fr': {
-    'app_name': 'FinPath',
-    'app_tagline': 'Votre Guide Financier Local',
-    'welcome_title': 'Bienvenue sur FinPath',
+    'app_name': 'Mulah',
+    'app_tagline': 'Votre Ami Financier IA',
+    'welcome_title': 'Bienvenue sur Mulah',
     'welcome_subtitle': 'Aider les familles à mieux budgétiser, mieux vivre et construire un avenir — un choix local à la fois.',
     'get_started': 'Commencer',
     
@@ -189,7 +189,7 @@ const Map<String, Map<String, String>> translations = {
     'continue': 'Continuer',
     'data_secure': 'Vos informations sont en sécurité avec nous',
     
-    'chat_with_ai': 'Chattez avec FinBot',
+    'chat_with_ai': 'Chattez avec MulahBot',
     'type_answer': 'Tapez votre réponse...',
     'tap_to_continue': 'Appuyez sur les cartes pour continuer',
     
@@ -198,7 +198,7 @@ const Map<String, Map<String, String>> translations = {
     'remaining': 'restant',
     'savings_goal': 'Objectif d\'Épargne',
     'complete': 'Complet',
-    'ai_mentor_says': 'FinBot Dit 🤖',
+    'ai_mentor_says': 'MulahBot Dit 🤖',
     'quick_actions': 'Actions Rapides',
     'view_budget': 'Voir le Budget',
     'find_deals': 'Trouver des Offres',
@@ -249,17 +249,17 @@ const Map<String, Map<String, String>> translations = {
   },
   
   // Adding more languages with essential translations
-  'de': {'app_name': 'FinPath', 'app_tagline': 'Ihr Lokaler Finanzratgeber', 'welcome_title': 'Willkommen bei FinPath'},
-  'it': {'app_name': 'FinPath', 'app_tagline': 'La Tua Guida Finanziaria Locale', 'welcome_title': 'Benvenuto su FinPath'},
-  'pt': {'app_name': 'FinPath', 'app_tagline': 'Seu Guia Financeiro Local', 'welcome_title': 'Bem-vindo ao FinPath'},
-  'zh': {'app_name': 'FinPath', 'app_tagline': '您的本地理财指南', 'welcome_title': '欢迎使用 FinPath'},
-  'ar': {'app_name': 'FinPath', 'app_tagline': 'دليلك المالي المحلي', 'welcome_title': 'مرحباً بك في FinPath'},
-  'hi': {'app_name': 'FinPath', 'app_tagline': 'आपका स्थानीय वित्तीय गाइड', 'welcome_title': 'FinPath में आपका स्वागत है'},
-  'ru': {'app_name': 'FinPath', 'app_tagline': 'Ваш Местный Финансовый Гид', 'welcome_title': 'Добро пожаловать в FinPath'},
-  'ja': {'app_name': 'FinPath', 'app_tagline': 'あなたの地域金融ガイド', 'welcome_title': 'FinPathへようこそ'},
-  'ko': {'app_name': 'FinPath', 'app_tagline': '당신의 지역 금융 가이드', 'welcome_title': 'FinPath에 오신 것을 환영합니다'},
-  'tr': {'app_name': 'FinPath', 'app_tagline': 'Yerel Finans Rehberiniz', 'welcome_title': 'FinPath\'e Hoş Geldiniz'},
-  'pl': {'app_name': 'FinPath', 'app_tagline': 'Twój Lokalny Przewodnik Finansowy', 'welcome_title': 'Witamy w FinPath'},
-  'nl': {'app_name': 'FinPath', 'app_tagline': 'Uw Lokale Financiële Gids', 'welcome_title': 'Welkom bij FinPath'},
+  'de': {'app_name': 'Mulah', 'app_tagline': 'Ihr KI-Finanzfreund', 'welcome_title': 'Willkommen bei Mulah'},
+  'it': {'app_name': 'Mulah', 'app_tagline': 'Il Tuo Amico Finanziario IA', 'welcome_title': 'Benvenuto su Mulah'},
+  'pt': {'app_name': 'Mulah', 'app_tagline': 'Seu Amigo Financeiro IA', 'welcome_title': 'Bem-vindo ao Mulah'},
+  'zh': {'app_name': 'Mulah', 'app_tagline': '您的AI理财伙伴', 'welcome_title': '欢迎使用 Mulah'},
+  'ar': {'app_name': 'Mulah', 'app_tagline': 'صديقك المالي بالذكاء الاصطناعي', 'welcome_title': 'مرحباً بك في Mulah'},
+  'hi': {'app_name': 'Mulah', 'app_tagline': 'आपका AI वित्तीय मित्र', 'welcome_title': 'Mulah में आपका स्वागत है'},
+  'ru': {'app_name': 'Mulah', 'app_tagline': 'Ваш ИИ-Финансовый Друг', 'welcome_title': 'Добро пожаловать в Mulah'},
+  'ja': {'app_name': 'Mulah', 'app_tagline': 'あなたのAI金融バディ', 'welcome_title': 'Mulahへようこそ'},
+  'ko': {'app_name': 'Mulah', 'app_tagline': '당신의 AI 금융 친구', 'welcome_title': 'Mulah에 오신 것을 환영합니다'},
+  'tr': {'app_name': 'Mulah', 'app_tagline': 'Yapay Zeka Finans Arkadaşınız', 'welcome_title': 'Mulah\'a Hoş Geldiniz'},
+  'pl': {'app_name': 'Mulah', 'app_tagline': 'Twój Przyjaciel Finansowy AI', 'welcome_title': 'Witamy w Mulah'},
+  'nl': {'app_name': 'Mulah', 'app_tagline': 'Uw AI Financiële Vriend', 'welcome_title': 'Welkom bij Mulah'},
 };
 

@@ -54,7 +54,7 @@ class _SplashScreenState extends State<SplashScreen> {
               FadeInUp(
                 duration: const Duration(milliseconds: 800),
                 child: const Text(
-                  'FinPath',
+                  'Mulah',
                   style: TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.bold,

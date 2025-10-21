@@ -21,11 +21,11 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   
-  runApp(const FinPathApp());
+  runApp(const MulahApp());
 }
 
-class FinPathApp extends StatelessWidget {
-  const FinPathApp({super.key});
+class MulahApp extends StatelessWidget {
+  const MulahApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +71,7 @@ class FinPathApp extends StatelessWidget {
       child: Consumer<LanguageProvider>(
         builder: (context, languageProvider, child) {
           return MaterialApp(
-            title: 'FinPath',
+            title: 'Mulah',
             debugShowCheckedModeBanner: false,
             locale: languageProvider.locale,
             localizationsDelegates: const [

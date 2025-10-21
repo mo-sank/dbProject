@@ -34,7 +34,7 @@ class _OnboardingChatScreenState extends State<OnboardingChatScreen> {
 
   final List<OnboardingQuestion> _questions = [
     OnboardingQuestion(
-      text: 'Hi! I\'m FinBot, your AI financial buddy! 🤖✨\n\nI\'m here to help you manage your budget and find the best local resources for your family.\n\nLet\'s get to know each other! Where do you currently live?',
+      text: 'Hi! I\'m MulahBot, your AI financial buddy! 🤖✨\n\nI\'m here to help you manage your budget and find the best local resources for your family.\n\nLet\'s get to know each other! Where do you currently live?',
       type: QuestionType.text,
       key: 'location',
     ),
@@ -212,7 +212,7 @@ class _OnboardingChatScreenState extends State<OnboardingChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chat with FinBot'),
+        title: const Text('Chat with MulahBot'),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
